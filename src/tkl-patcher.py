@@ -14,7 +14,11 @@ class TklPatcher(cmd.Cmd):
     you execute commands in it
     """
     intro = """A quick and dirty shell that automatically generates a tkl-patch
-as you execute commands in it.  Use Ctrl + D to exit
+as you execute commands in it.
+
+Start with the "use <package-name>" command to create or append a package.
+"help" for a list of all commands
+Use Ctrl + D to exit
 """
     prompt = '->'
 
