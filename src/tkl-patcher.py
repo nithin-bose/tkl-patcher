@@ -16,6 +16,7 @@ class TklPatcher(cmd.Cmd):
     intro = """A quick and dirty shell that automatically generates a tkl-patch
 as you execute commands in it.  Use Ctrl + D to exit
 """
+    prompt = '->'
 
     _cwd = os.getcwd()
     _templateFile = os.path.dirname(__file__) + '/conf-template'
