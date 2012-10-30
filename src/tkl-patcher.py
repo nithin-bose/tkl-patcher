@@ -9,7 +9,14 @@ import shutil
 
 
 class TklPatcher(cmd.Cmd):
-    """Simple command processor example."""
+    """
+    A quick and dirty shell that automatically generates a tkl-patch as
+    you execute commands in it
+    """
+    intro = """A quick and dirty shell that automatically generates a tkl-patch
+as you execute commands in it.  Use Ctrl + D to exit
+"""
+
     _cwd = os.getcwd()
     _templateFile = os.path.dirname(__file__) + '/conf-template'
 
@@ -53,6 +60,17 @@ class TklPatcher(cmd.Cmd):
         self._createSkeletonConfFile(self.confFile)
 
     def do_use(self, args):
+        """
+        use [package-name]
+        This creates a basic TKL package folder with the given name in the
+        current directory.
+
+        If a package with the given name already exists in
+        the current directory, it is used and all the changes will be appended
+        to the existing package.
+
+        The conf-template file is used as a skeleten for conf
+        """
         args = shlex.split(args)
         if len(args) > 0:
             self._patchName = args[0]
@@ -65,6 +83,23 @@ class TklPatcher(cmd.Cmd):
             print "Patch name not specified"
 
     def do_install(self, args):
+        """
+        install [package-name]
+        The shell runs "apt-get install <package-name>" command for the user
+        But enters "install <package-name>" into the conf file where install is
+        the following bash function:
+            install()
+            {
+                apt-get update
+                DEBIAN_FRONTEND=noninteractive apt-get -y \\
+                -o DPkg::Options::=--force-confdef \\
+                -o DPkg::Options::=--force-confold \\
+                install $@
+            }
+
+        If this is not in the conf-template file, the generated conf file will
+        fail
+        """
         command = 'apt-get update && apt-get install' + args
         print "Running command: %s" % (command)
         command = shlex.split(command)
@@ -79,11 +114,21 @@ class TklPatcher(cmd.Cmd):
             print "Error skipping command"
 
     def do_test(self, args):
+        """
+        test [command]
+        Used to execute linux commands. This commands will not be added to the
+        conf file
+        """
         command = shlex.split(args)
         print "Testing command without writing to conf: %s" % (args)
         subprocess.call(command)
 
     def do_shell(self, args):
+        """
+        shell [command] or ![command]
+        Used to execute linux commands. This commands will be added to the
+        conf file
+        """
         command = shlex.split(args)
         print "Running command: %s" % (args)
         returnCode = subprocess.call(command)
@@ -95,6 +140,11 @@ class TklPatcher(cmd.Cmd):
             print "Error skipping command"
 
     def do_edit(self, args):
+        """
+        edit [file-name]
+        The given filename will be opened in editor. The changed file is then
+        copied to the overlays folder with its folder tree
+        """
         filePath = os.path.abspath(args)
         command = ['nano']
         command += shlex.split(filePath)
