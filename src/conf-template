@@ -1,0 +1,15 @@
+#!/bin/bash -ex
+HOSTNAME=%s
+
+# set hostname
+echo "$HOSTNAME" > /etc/hostname
+sed -i "s|127.0.1.1 \(.*\)|127.0.1.1 $HOSTNAME|" /etc/hosts
+
+install()
+{
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get -y \\
+    -o DPkg::Options::=--force-confdef \\
+    -o DPkg::Options::=--force-confold \\
+    install $@
+}
